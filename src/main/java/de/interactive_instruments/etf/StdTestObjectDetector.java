@@ -21,10 +21,7 @@ import java.util.*;
 import de.interactive_instruments.Credentials;
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectTypeDto;
 import de.interactive_instruments.etf.detector.TestObjectTypeDetector;
-import de.interactive_instruments.etf.model.DefaultEidMap;
-import de.interactive_instruments.etf.model.EID;
-import de.interactive_instruments.etf.model.EidFactory;
-import de.interactive_instruments.etf.model.EidMap;
+import de.interactive_instruments.etf.model.*;
 import de.interactive_instruments.etf.model.capabilities.TestObjectType;
 
 public class StdTestObjectDetector implements TestObjectTypeDetector {
@@ -123,6 +120,9 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 	private static final TestObjectTypeDto METADATA_RECORDS_TOT = new TestObjectTypeDto();
 	static EID METADATA_RECORDS_ID = EidFactory.getDefault().createAndPreserveStr("5a60dded-0cb0-4977-9b06-16c6c2321d2e");
 
+	private static final String owsLabelExpression = "/*/*[local-name() = 'ServiceIdentification' or local-name() = 'Service' ]/*[local-name() = 'Title']/text()";
+	private static final String owsDescriptionExpression = "/*/*[local-name() = 'ServiceIdentification' or local-name() = 'Service']/*[local-name() = 'Abstract']/text()";
+
 	// Supported Test Object Types
 	private final static EidMap<TestObjectTypeDto> types = new DefaultEidMap<>(
 			Collections.unmodifiableMap(new LinkedHashMap<EID, TestObjectTypeDto>() {
@@ -144,7 +144,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WFS_2_0_TOT.setId(WFS_2_0_ID);
 					WFS_2_0_TOT.setParent(WFS_TOT);
 					WFS_2_0_TOT.setDescription("A web service implementing OGC Web Feature Service 2.0 and OGC Filter Encoding 2.0.");
-					// WFS_2_0_TOT.setDetectionXPath("/*[local-name() = 'WFS_Capabilities' and namespace-uri() = 'http://www.opengis.net/wfs/2.0']");
+					WFS_2_0_TOT.setDetectionExpression("/*[local-name() = 'WFS_Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wfs/2.0']", ExpressionType.XPATH);
+					WFS_2_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WFS_2_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WFS_2_0_ID, WFS_2_0_TOT);
 				}
 				{
@@ -152,7 +155,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WFS_1_1_TOT.setId(WFS_1_1_ID);
 					WFS_1_1_TOT.setParent(WFS_TOT);
 					WFS_1_1_TOT.setDescription("A web service implementing OGC Web Feature Service 1.1 and OGC Filter Encoding 1.1.");
-					// WFS_1_1_TOT.setDetectionXPath("/*[local-name() = 'WFS_Capabilities' and namespace-uri() = 'http://www.opengis.net/wfs' and starts-with(@version,'1.1')]");
+					WFS_1_1_TOT.setDetectionExpression("/*[local-name() = 'WFS_Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wfs' and starts-with(@version,'1.1')]", ExpressionType.XPATH);
+					WFS_1_1_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WFS_1_1_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WFS_1_1_ID, WFS_1_1_TOT);
 				}
 				{
@@ -160,7 +166,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WFS_1_0_TOT.setId(WFS_1_0_ID);
 					WFS_1_0_TOT.setParent(WFS_TOT);
 					WFS_1_0_TOT.setDescription("A web service implementing OGC Web Feature Service 1.0 and OGC Filter Encoding 1.0.");
-					// WFS_1_0_TOT.setDetectionXPath("/*[local-name() = 'WFS_Capabilities' and namespace-uri() = 'http://www.opengis.net/wfs' and @version='1.0.0']");
+					WFS_1_0_TOT.setDetectionExpression("/*[local-name() = 'WFS_Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wfs' and @version='1.0.0']", ExpressionType.XPATH);
+					WFS_1_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WFS_1_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WFS_1_0_ID, WFS_1_0_TOT);
 				}
 				{
@@ -168,6 +177,8 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WMS_TOT.setId(WMS_ID);
 					WMS_TOT.setParent(WEB_SERVICE_TOT);
 					WMS_TOT.setDescription("A web service implementing the OGC Web Map Service standard.");
+					WMS_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WMS_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WMS_ID, WMS_TOT);
 				}
 				{
@@ -175,7 +186,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WMS_1_3_TOT.setId(WMS_1_3_ID);
 					WMS_1_3_TOT.setParent(WMS_TOT);
 					WMS_1_3_TOT.setDescription("A web service implementing OGC Web Map Service 1.3.");
-					// WMS_1_3_TOT.setDetectionXPath("/*[local-name() = 'WMS_Capabilities' and namespace-uri() = 'http://www.opengis.net/wms' and @version = '1.3.0']");
+					WMS_1_3_TOT.setDetectionExpression("/*[local-name() = 'WMS_Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wms' and @version = '1.3.0']", ExpressionType.XPATH);
+					WMS_1_3_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WMS_1_3_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WMS_1_3_ID, WMS_1_3_TOT);
 				}
 				{
@@ -183,7 +197,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WMS_1_1_TOT.setId(WMS_1_1_ID);
 					WMS_1_1_TOT.setParent(WMS_TOT);
 					WMS_1_1_TOT.setDescription("A web service implementing OGC Web Map Service 1.1.");
-					// WMS_1_1_TOT.setDetectionXPath("/*[local-name() = 'WMT_MS_Capabilities' and @version = '1.1.1']");
+					WMS_1_1_TOT.setDetectionExpression("/*[local-name() = 'WMT_MS_Capabilities' and "
+							+ "@version = '1.1.1']", ExpressionType.XPATH);
+					WMS_1_1_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WMS_1_1_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WMS_1_1_ID, WMS_1_1_TOT);
 				}
 				{
@@ -198,7 +215,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WMTS_1_0_TOT.setId(WMTS_1_0_ID);
 					WMTS_1_0_TOT.setParent(WMTS_TOT);
 					WMTS_1_0_TOT.setDescription("A web service implementing OGC Web Map Tile Service 1.0.");
-					// WMTS_1_0_TOT.setDetectionXPath("/*[local-name() = 'Capabilities' and namespace-uri() = 'http://www.opengis.net/wmts/1.0']");
+					WMTS_1_0_TOT.setDetectionExpression("/*[local-name() = 'Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wmts/1.0']", ExpressionType.XPATH);
+					WMTS_1_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WMTS_1_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WMTS_1_0_ID, WMTS_1_0_TOT);
 				}
 				{
@@ -213,7 +233,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WCS_2_0_TOT.setId(WCS_2_0_ID);
 					WCS_2_0_TOT.setParent(WCS_TOT);
 					WCS_2_0_TOT.setDescription("A web service implementing OGC Web Coverage Service 2.0.");
-					// WCS_2_0_TOT.setDetectionXPath("/*[local-name() = 'Capabilities' and namespace-uri() = 'http://www.opengis.net/wcs/2.0']");
+					WCS_2_0_TOT.setDetectionExpression("/*[local-name() = 'Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wcs/2.0']", ExpressionType.XPATH);
+					WCS_2_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WCS_2_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WCS_2_0_ID, WCS_2_0_TOT);
 				}
 				{
@@ -221,7 +244,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WCS_1_1_TOT.setId(WCS_1_1_ID);
 					WCS_1_1_TOT.setParent(WCS_TOT);
 					WCS_1_1_TOT.setDescription("A web service implementing OGC Web Coverage Service 1.1.");
-					// WCS_1_1_TOT.setDetectionXPath("/*[local-name() = 'Capabilities' and namespace-uri() = 'http://www.opengis.net/wcs/1.1']");
+					WCS_1_1_TOT.setDetectionExpression("/*[local-name() = 'Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wcs/1.1']", ExpressionType.XPATH);
+					WCS_1_1_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WCS_1_1_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WCS_1_1_ID, WCS_1_1_TOT);
 				}
 				{
@@ -229,7 +255,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WCS_1_0_TOT.setId(WCS_1_0_ID);
 					WCS_1_0_TOT.setParent(WCS_TOT);
 					WCS_1_0_TOT.setDescription("A web service implementing OGC Web Coverage Service 1.0.");
-					// WCS_1_0_TOT.setDetectionXPath("/*[local-name() = 'WCS_Capabilities' and namespace-uri() = 'http://www.opengis.net/wcs']");
+					WCS_1_0_TOT.setDetectionExpression("/*[local-name() = 'WCS_Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wcs']", ExpressionType.XPATH);
+					WCS_1_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					WCS_1_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(WCS_1_0_ID, WCS_1_0_TOT);
 				}
 				{
@@ -244,7 +273,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					SOS_2_0_TOT.setId(SOS_2_0_ID);
 					SOS_2_0_TOT.setParent(SOS_TOT);
 					SOS_2_0_TOT.setDescription("A web service implementing OGC Sensor Observation Service 2.0.");
-					// SOS_2_0_TOT.setDetectionXPath("/*[local-name() = 'Capabilities' and namespace-uri() = 'http://www.opengis.net/sos/2.0']");
+					SOS_2_0_TOT.setDetectionExpression("/*[local-name() = 'Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/sos/2.0']", ExpressionType.XPATH);
+					SOS_2_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					SOS_2_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(SOS_2_0_ID, SOS_2_0_TOT);
 				}
 				{
@@ -259,7 +291,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					CSW_3_0_TOT.setId(CSW_3_0_ID);
 					CSW_3_0_TOT.setParent(CSW_TOT);
 					CSW_3_0_TOT.setDescription("A web service implementing OGC Catalogue Service 3.0");
-					// CSW_3_0_TOT.setDetectionXPath("/*[local-name() = 'Capabilities' and namespace-uri() = 'http://www.opengis.net/cat/csw/3.0']");
+					CSW_3_0_TOT.setDetectionExpression("/*[local-name() = 'Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/cat/csw/3.0']", ExpressionType.XPATH);
+					CSW_3_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					CSW_3_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(CSW_3_0_ID, CSW_3_0_TOT);
 				}
 				{
@@ -267,7 +302,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					CSW_2_0_2_TOT.setId(CSW_2_0_2_ID);
 					CSW_2_0_2_TOT.setParent(CSW_TOT);
 					CSW_2_0_2_TOT.setDescription("A web service implementing OGC Catalogue Service 2.0.2.");
-					// CSW_2_0_2_TOT.setDetectionXPath("/*[local-name() = 'Capabilities' and namespace-uri() = 'http://www.opengis.net/cat/csw/2.0.2']");
+					CSW_2_0_2_TOT.setDetectionExpression("/*[local-name() = 'Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/cat/csw/2.0.2']", ExpressionType.XPATH);
+					CSW_2_0_2_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					CSW_2_0_2_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(CSW_2_0_2_ID, CSW_2_0_2_TOT);
 				}
 				{
@@ -275,7 +313,10 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					CSW_2_0_2_EBRIM_1_0_TOT.setId(CSW_2_0_2_EBRIM_1_0_ID);
 					CSW_2_0_2_EBRIM_1_0_TOT.setParent(CSW_TOT);
 					CSW_2_0_2_EBRIM_1_0_TOT.setDescription("A web service implementing the CSW-ebRIM Registry Service 1.0");
-					// CSW_2_0_2_EBRIM_1_0_TOT.setDetectionXPath("/*[local-name() = 'Capabilities' and namespace-uri() = 'http://www.opengis.net/cat/wrs/1.0']");
+					CSW_2_0_2_EBRIM_1_0_TOT.setDetectionExpression("/*[local-name() = 'Capabilities' and "
+							+ "namespace-uri() = 'http://www.opengis.net/cat/wrs/1.0']", ExpressionType.XPATH);
+					CSW_2_0_2_EBRIM_1_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
+					CSW_2_0_2_EBRIM_1_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
 					put(CSW_2_0_2_EBRIM_1_0_ID, CSW_2_0_2_EBRIM_1_0_TOT);
 				}
 				{
@@ -283,7 +324,12 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					ATOM_TOT.setId(ATOM_ID);
 					ATOM_TOT.setParent(WEB_SERVICE_TOT);
 					ATOM_TOT.setDescription("A feed implementing the Atom Syndication Format that can be accessed using HTTP(S).");
-					// ATOM_TOT.setDetectionXPath("/*[local-name() = 'feed' and namespace-uri() = 'http://www.w3.org/2005/Atom']");
+					ATOM_TOT.setDetectionExpression("/*[local-name() = 'feed' and namespace-uri() = 'http://www.w3.org/2005/Atom']",
+							ExpressionType.XPATH);
+					ATOM_TOT.setLabelExpression("/*[local-name() = 'feed' and namespace-uri() = 'http://www.w3.org/2005/Atom']"
+									+ "/*[local-name() = 'title' and namespace-uri() = 'http://www.w3.org/2005/Atom']", ExpressionType.XPATH);
+					ATOM_TOT.setDescriptionExpression("/*[local-name() = 'feed' and namespace-uri() = 'http://www.w3.org/2005/Atom']"
+							+ "/*[local-name() = 'subtitle' and namespace-uri() = 'http://www.w3.org/2005/Atom']", ExpressionType.XPATH);
 					put(ATOM_ID, ATOM_TOT);
 				}
 				{
@@ -311,7 +357,8 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					WFS20_FEATURE_COLLECTION_TOT.setId(WFS20_FEATURE_COLLECTION_ID);
 					WFS20_FEATURE_COLLECTION_TOT.setParent(GML_FEATURE_COLLECTION_TOT);
 					WFS20_FEATURE_COLLECTION_TOT.setDescription("A set of XML documents. Each document contains a WFS 2.0 feature collection.");
-					// WFS20_FEATURE_COLLECTION_TOT.setDetectionXPath("/*[local-name() = 'FeatureCollection' and namespace-uri() = 'http://www.opengis.net/wfs/2.0']");
+					WFS20_FEATURE_COLLECTION_TOT.setDetectionExpression("/*[local-name() = 'FeatureCollection' and "
+							+ "namespace-uri() = 'http://www.opengis.net/wfs/2.0']", ExpressionType.XPATH);
 					put(WFS20_FEATURE_COLLECTION_ID, WFS20_FEATURE_COLLECTION_TOT);
 				}
 				{
@@ -319,7 +366,9 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					GML32_FEATURE_COLLECTION_TOT.setId(GML32_FEATURE_COLLECTION_ID);
 					GML32_FEATURE_COLLECTION_TOT.setParent(GML_FEATURE_COLLECTION_TOT);
 					GML32_FEATURE_COLLECTION_TOT.setDescription("A set of XML documents. Each document contains a GML 3.2 feature collection.");
-					// GML32_FEATURE_COLLECTION_TOT.setDetectionXPath("/*[local-name() = 'FeatureCollection' and namespace-uri() = 'http://www.opengis.net/gml/3.2']");
+					GML32_FEATURE_COLLECTION_TOT.setDetectionExpression("/*[local-name() = 'FeatureCollection' and "
+							+ "namespace-uri() = 'http://www.opengis.net/gml/3.2']", ExpressionType.XPATH);
+					// TODO gml:Description and gml:name
 					put(GML32_FEATURE_COLLECTION_ID, GML32_FEATURE_COLLECTION_TOT);
 				}
 				{
@@ -327,7 +376,8 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					GML31_GML21_FEATURE_COLLECTION_TOT.setId(GML31_GML21_FEATURE_COLLECTION_ID);
 					GML31_GML21_FEATURE_COLLECTION_TOT.setParent(GML_FEATURE_COLLECTION_TOT);
 					GML31_GML21_FEATURE_COLLECTION_TOT.setDescription("A set of XML documents. Each document contains a GML 2.1 or GML 3.1 feature collection.");
-					// GML31_GML21_FEATURE_COLLECTION_TOT.setDetectionXPath("/*[local-name() = 'FeatureCollection' and namespace-uri() = 'http://www.opengis.net/gml']");
+					GML31_GML21_FEATURE_COLLECTION_TOT.setDetectionExpression("/*[local-name() = 'FeatureCollection' and "
+							+ "namespace-uri() = 'http://www.opengis.net/gml']", ExpressionType.XPATH);
 					put(GML31_GML21_FEATURE_COLLECTION_ID, GML31_GML21_FEATURE_COLLECTION_TOT);
 				}
 				{
@@ -335,7 +385,8 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					INSPIRE_SPATIAL_DATASET_TOT.setId(INSPIRE_SPATIAL_DATASET_ID);
 					INSPIRE_SPATIAL_DATASET_TOT.setParent(GML_FEATURE_COLLECTION_TOT);
 					INSPIRE_SPATIAL_DATASET_TOT.setDescription("A set of XML documents. Each document contains an INSPIRE SpatialDataSet.");
-					// INSPIRE_SPATIAL_DATASET_TOT.setDetectionXPath("/*[local-name() = 'SpatialDataSet' and starts-with(namespace-uri(), 'http://inspire.ec.europa.eu/schemas/base/')]");
+					INSPIRE_SPATIAL_DATASET_TOT.setDetectionExpression("/*[local-name() = 'SpatialDataSet' and "
+							+ "starts-with(namespace-uri(), 'http://inspire.ec.europa.eu/schemas/base/')]", ExpressionType.XPATH);
 					put(INSPIRE_SPATIAL_DATASET_ID, INSPIRE_SPATIAL_DATASET_TOT);
 				}
 				{
@@ -343,7 +394,8 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					CITYGML20_CITY_MODEL_TOT.setId(CITYGML20_CITY_MODEL_ID);
 					CITYGML20_CITY_MODEL_TOT.setParent(GML_FEATURE_COLLECTION_TOT);
 					CITYGML20_CITY_MODEL_TOT.setDescription("A set of XML documents. Each document contains a CityGML 2.0 CityModel.");
-					// CITYGML20_CITY_MODEL_TOT.setDetectionXPath("/*[local-name() = 'CityModel' and namespace-uri() = 'http://www.opengis.net/citygml/2.0']");
+					CITYGML20_CITY_MODEL_TOT.setDetectionExpression("/*[local-name() = 'CityModel' and "
+							+ "namespace-uri() = 'http://www.opengis.net/citygml/2.0']", ExpressionType.XPATH);
 					put(CITYGML20_CITY_MODEL_ID, CITYGML20_CITY_MODEL_TOT);
 				}
 				{
@@ -351,7 +403,8 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					CITYGML10_CITY_MODEL_TOT.setId(CITYGML10_CITY_MODEL_ID);
 					CITYGML10_CITY_MODEL_TOT.setParent(GML_FEATURE_COLLECTION_TOT);
 					CITYGML10_CITY_MODEL_TOT.setDescription("A set of XML documents. Each document contains a CityGML 1.0 CityModel.");
-					// CITYGML10_CITY_MODEL_TOT.setDetectionXPath("/*[local-name() = 'CityModel' and namespace-uri() = 'http://www.opengis.net/citygml/1.0']");
+					CITYGML10_CITY_MODEL_TOT.setDetectionExpression("/*[local-name() = 'CityModel' and "
+							+ "namespace-uri() = 'http://www.opengis.net/citygml/1.0']", ExpressionType.XPATH);
 					put(CITYGML10_CITY_MODEL_ID, CITYGML10_CITY_MODEL_TOT);
 				}
 				{
@@ -359,7 +412,9 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					METADATA_RECORDS_TOT.setId(METADATA_RECORDS_ID);
 					METADATA_RECORDS_TOT.setParent(XML_DOCUMENTS_TOT);
 					METADATA_RECORDS_TOT.setDescription("A set of XML documents. Each document contains one or more gmd:MD_Metadata elements.");
-					// METADATA_RECORDS_TOT.setDetectionXPath("/*[local-name() = 'GetRecordsResponse' and starts-with(namespace-uri() = 'http://www.opengis.net/cat/csw/')] | /*[local-name() = 'MD_Metadata' and namespace-uri() = 'http://www.isotc211.org/2005/gmd']");
+					METADATA_RECORDS_TOT.setDetectionExpression("/*[local-name() = 'GetRecordsResponse' and "
+							+ "starts-with(namespace-uri() = 'http://www.opengis.net/cat/csw/')] | "
+							+ "/*[local-name() = 'MD_Metadata' and namespace-uri() = 'http://www.isotc211.org/2005/gmd']", ExpressionType.XPATH);
 					put(METADATA_RECORDS_ID, METADATA_RECORDS_TOT);
 				}
 			}));
