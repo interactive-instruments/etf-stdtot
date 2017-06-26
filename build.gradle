@@ -30,7 +30,13 @@ description = 'ETF standard Test Object Types'
 dependencies {
     compileOnly group: 'de.interactive_instruments', name: 'ii-commons-util', version:'2.0.0'+project.snapshotSuffix
     compileOnly group: 'de.interactive_instruments.etf', name: 'etf-core', version:'1.0.0'+project.snapshotSuffix
-
     compileOnly group: 'commons-collections', name: 'commons-collections', version: etf_commonsCollectionsVersion
+    compile group: 'in.jlibs', name: 'jlibs-xmldog', version: '2.2.1'
 
+
+    // Testing
+    testCompile group: 'junit', name: 'junit', version: etf_junitTestVersion
+    testCompile group: 'de.interactive_instruments', name: 'ii-commons-util', version:'2.0.0'+project.snapshotSuffix
+    testCompile group: 'de.interactive_instruments.etf', name: 'etf-core', version:'1.0.0'+project.snapshotSuffix
+    testCompile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.5.2'
 }
