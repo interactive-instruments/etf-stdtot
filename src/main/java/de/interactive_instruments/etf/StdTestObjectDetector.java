@@ -682,6 +682,11 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 			throw new IllegalArgumentException("Invalid object type comparison: " +
 					o.getClass().getName() + " can not be compared.");
 		}
+
+		@Override
+		public TestObjectTypeDto toTestObjectTypeDto() {
+			return testObjectType.createCopy();
+		}
 	}
 
 	private DetectedTestObjectType detect(final XPathResults results, final String uriScheme) {
