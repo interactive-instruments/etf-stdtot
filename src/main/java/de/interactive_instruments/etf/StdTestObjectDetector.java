@@ -598,11 +598,6 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 		}
 
 		@Override
-		public String getNamingConvention() {
-			return testObjectType.getNamingConvention();
-		}
-
-		@Override
 		public List<String> getFilenameExtensions() {
 			return testObjectType.getFilenameExtensions();
 		}
