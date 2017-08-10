@@ -127,7 +127,7 @@ final class CompiledDetectionExpression implements Comparable<CompiledDetectionE
 		if(cmp==0) {
 			// Compare label so that "OGC Web Feature Service 2.0" is tested before
 			// "OGC Web Feature Service 1.1"
-			return this.testObjectType.getLabel().compareTo(o.testObjectType.getLabel());
+			return -this.testObjectType.getLabel().compareTo(o.testObjectType.getLabel());
 		}
 		return cmp;
 	}
