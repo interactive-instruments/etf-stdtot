@@ -152,6 +152,7 @@ class StdDetectedTestObjectType implements DetectedTestObjectType {
 			testObject.getResourceCollection().iterator().next().setUri(
 					normalizedResource.getUri());
 		}
+		testObject.setTestObjectType(this.testObjectType);
 	}
 
 	@Override
