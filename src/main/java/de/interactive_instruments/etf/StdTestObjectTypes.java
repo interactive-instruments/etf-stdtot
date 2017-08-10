@@ -15,11 +15,11 @@
  */
 package de.interactive_instruments.etf;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectTypeDto;
 import de.interactive_instruments.etf.model.*;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
 
 /**
  * Standard Test Object Types.

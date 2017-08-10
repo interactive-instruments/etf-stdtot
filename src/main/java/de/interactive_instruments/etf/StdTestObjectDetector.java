@@ -15,39 +15,41 @@
  */
 package de.interactive_instruments.etf;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.*;
-
-import javax.xml.xpath.XPathException;
-import javax.xml.xpath.XPathExpressionException;
-
-import jlibs.xml.DefaultNamespaceContext;
-import jlibs.xml.sax.dog.DataType;
-import jlibs.xml.sax.dog.NodeItem;
-import jlibs.xml.sax.dog.XMLDog;
-import jlibs.xml.sax.dog.XPathResults;
-import jlibs.xml.sax.dog.expr.Expression;
-
-import org.jaxen.saxpath.SAXPathException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
-
-import de.interactive_instruments.*;
+import de.interactive_instruments.IFile;
+import de.interactive_instruments.SUtils;
+import de.interactive_instruments.Sample;
+import de.interactive_instruments.UriUtils;
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectTypeDto;
 import de.interactive_instruments.etf.detector.DetectedTestObjectType;
 import de.interactive_instruments.etf.detector.TestObjectTypeDetector;
-import de.interactive_instruments.etf.model.*;
-import de.interactive_instruments.etf.model.capabilities.TestObjectType;
+import de.interactive_instruments.etf.model.DefaultEidMap;
+import de.interactive_instruments.etf.model.EID;
+import de.interactive_instruments.etf.model.EidMap;
+import de.interactive_instruments.etf.model.capabilities.Resource;
+import de.interactive_instruments.etf.model.capabilities.StdResource;
 import de.interactive_instruments.exceptions.ExcUtils;
 import de.interactive_instruments.exceptions.InitializationException;
 import de.interactive_instruments.exceptions.InvalidStateTransitionException;
 import de.interactive_instruments.exceptions.config.ConfigurationException;
 import de.interactive_instruments.io.GmlAndXmlFilter;
+import jlibs.xml.DefaultNamespaceContext;
+import jlibs.xml.sax.dog.XMLDog;
+import jlibs.xml.sax.dog.XPathResults;
+import org.jaxen.saxpath.SAXPathException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+
+import javax.xml.xpath.XPathException;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Standard detector for Test Object Types.
@@ -66,281 +68,13 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 	private static Logger logger = LoggerFactory.getLogger(StdTestObjectDetector.class);
 	private boolean initialized = false;
 
-	private final List<CompiledXpathExpression> detectionExpressions = new ArrayList<>();
+	private final List<CompiledDetectionExpression> detectionExpressions = new ArrayList<>();
 
-	private final EidMap<CompiledXpathExpression> detectionExpressionsEidMap = new DefaultEidMap<>();
+	private final EidMap<CompiledDetectionExpression> detectionExpressionsEidMap = new DefaultEidMap<>();
+
+
 
 	private final XMLDog xmlDog = new XMLDog(new DefaultNamespaceContext(), null, null);
-
-	private static final class CompiledXpathExpression implements Comparable<CompiledXpathExpression> {
-		private final TestObjectTypeDto testObjectType;
-		private final Expression detectionExpression;
-		private final Expression labelExpression;
-		private final Expression descriptionExpression;
-		private final int prio;
-
-		private CompiledXpathExpression(final TestObjectTypeDto testObjectType, final XMLDog dog) throws SAXPathException {
-			this.testObjectType = testObjectType;
-
-			detectionExpression = dog.addXPath(testObjectType.getDetectionExpression());
-			if (detectionExpression.resultType != DataType.BOOLEAN) {
-				throw new SAXPathException("Detection expression return type must be boolean");
-			}
-			if (!SUtils.isNullOrEmpty(testObjectType.getLabelExpression())) {
-				labelExpression = dog.addXPath(testObjectType.getLabelExpression());
-			} else {
-				labelExpression = null;
-			}
-			if (!SUtils.isNullOrEmpty(testObjectType.getDescriptionExpression())) {
-				descriptionExpression = dog.addXPath(testObjectType.getDescriptionExpression());
-			} else {
-				descriptionExpression = null;
-			}
-
-			// order objects with parents before objects without parents
-			TestObjectTypeDto parent = this.testObjectType.getParent();
-			int cmp = 0;
-			for (; parent != null; --cmp) {
-				parent = parent.getParent();
-			}
-			cmp += this.testObjectType.getSubTypes() == null ? -1 : 0;
-			prio = cmp;
-		}
-
-		private String getValue(final XPathResults results, final Expression expression) {
-			if (descriptionExpression != null) {
-				final Collection result = (Collection) results.getResult(expression);
-				if (result != null && !result.isEmpty()) {
-					return ((NodeItem) result.iterator().next()).value;
-				}
-			}
-			return null;
-		}
-
-		private DetectedTestObjectType getDetectedTestObjectType(final XPathResults results) throws XPathExpressionException {
-			// All expressions are expected to be boolean
-			final Object detected = results.getResult(detectionExpression);
-			if (detected != null && ((Boolean) detected)) {
-				return new StdDetectedTestObjectType(
-						this.testObjectType,
-						getValue(results, labelExpression),
-						getValue(results, descriptionExpression), prio);
-			}
-			return null;
-		}
-
-		@Override
-		public int compareTo(final CompiledXpathExpression o) {
-			return Integer.compare(this.prio, o.prio);
-		}
-	}
-
-	private static class StdDetectedTestObjectType implements DetectedTestObjectType {
-
-		private final TestObjectTypeDto testObjectType;
-		private final String extractedLabel;
-		private final String extractedDescription;
-		private final int prio;
-
-		private StdDetectedTestObjectType(final TestObjectTypeDto testObjectType, final String label,
-				final String description) {
-			this(testObjectType, label, description, 0);
-		}
-
-		private StdDetectedTestObjectType(final TestObjectTypeDto testObjectType, final String label, final String description,
-				final int prio) {
-			this.testObjectType = testObjectType;
-			this.extractedLabel = label;
-			this.extractedDescription = description;
-			this.prio = prio;
-		}
-
-		@Override
-		public int hashCode() {
-			return testObjectType.hashCode();
-		}
-
-		@Override
-		public boolean equals(final Object obj) {
-			return testObjectType.equals(obj);
-		}
-
-		@Override
-		public List<TestObjectTypeDto> getSubTypes() {
-			return testObjectType.getSubTypes();
-		}
-
-		@Override
-		public List<String> getFilenameExtensions() {
-			return testObjectType.getFilenameExtensions();
-		}
-
-		@Override
-		public List<String> getMimeTypes() {
-			return testObjectType.getMimeTypes();
-		}
-
-		@Override
-		public String getDetectionExpression() {
-			return testObjectType.getDetectionExpression();
-		}
-
-		@Override
-		public ExpressionType getDetectionExpressionType() {
-			return testObjectType.getDetectionExpressionType();
-		}
-
-		@Override
-		public String getLabelExpression() {
-			return testObjectType.getLabelExpression();
-		}
-
-		@Override
-		public ExpressionType getLabelExpressionType() {
-			return testObjectType.getLabelExpressionType();
-		}
-
-		@Override
-		public String getDescriptionExpression() {
-			return testObjectType.getDescriptionExpression();
-		}
-
-		@Override
-		public ExpressionType getDescriptionExpressionType() {
-			return testObjectType.getDescriptionExpressionType();
-		}
-
-		@Override
-		public String getLabel() {
-			return testObjectType.getLabel();
-		}
-
-		@Override
-		public String getDescription() {
-			return testObjectType.getDescription();
-		}
-
-		@Override
-		public EID getId() {
-			return testObjectType.getId();
-		}
-
-		@Override
-		public TestObjectType getParent() {
-			return testObjectType.getParent();
-		}
-
-		@Override
-		public String getExtractedLabel() {
-			return extractedLabel;
-		}
-
-		@Override
-		public String getExtractedDescription() {
-			return extractedDescription;
-		}
-
-		@Override
-		public int compareTo(final Object o) {
-			if (o instanceof StdDetectedTestObjectType) {
-				return Integer.compare(prio, ((StdDetectedTestObjectType) (o)).prio);
-			} else if (o instanceof EidHolder) {
-				return getId().compareTo(((EidHolder) (o)).getId());
-			}
-			throw new IllegalArgumentException("Invalid object type comparison: " +
-					o.getClass().getName() + " can not be compared.");
-		}
-
-		@Override
-		public TestObjectTypeDto toTestObjectTypeDto() {
-			return testObjectType.createCopy();
-		}
-	}
-
-	private DetectedTestObjectType detect(final XPathResults results, final String uriScheme) {
-		for (final CompiledXpathExpression detectionExpression : detectionExpressions) {
-			try {
-				final DetectedTestObjectType type = detectionExpression.getDetectedTestObjectType(results);
-				if (type != null) {
-					return type;
-				}
-			} catch (ClassCastException | XPathExpressionException e) {
-				logger.error("Could not evaluate XPath expression: ", e);
-			}
-		}
-		// Fallback
-		if (uriScheme.startsWith("http")) {
-			return new StdDetectedTestObjectType(StdTestObjectTypes.WEB_SERVICE_TOT, null, null);
-		} else {
-			return new StdDetectedTestObjectType(StdTestObjectTypes.XML_DOCUMENTS_TOT, null, null);
-		}
-	}
-
-	@Override
-	public DetectedTestObjectType detect(final URI uri, final Credentials credentials, final byte[] cachedContent) {
-		try {
-			xmlDog.sniff(new InputSource(new ByteArrayInputStream(cachedContent)));
-		} catch (final XPathException e) {
-			logger.error("Error occurred during Test Object Type detection {} :", uri.getPath(), e);
-		}
-		return null;
-	}
-
-	private DetectedTestObjectType detectFromSamples(final URI directory) throws IOException {
-		final IFile dir = new IFile(directory);
-		final List<IFile> files = dir.getFilesInDirRecursive(GmlAndXmlFilter.instance().filename(), 6, false);
-		if (files == null || files.size() == 0) {
-			throw new IOException("No files found");
-		}
-		final List<DetectedTestObjectType> detectedTypes = new ArrayList<>(5);
-		for (final IFile sample : Sample.normalDistributed(files, 5)) {
-			try {
-				final InputStream inputStream = new FileInputStream(sample);
-				detectedTypes.add(detect(xmlDog.sniff(new InputSource(inputStream)), "file"));
-			} catch (XPathException e) {
-				ExcUtils.suppress(e);
-			}
-		}
-		if (detectedTypes.size() == 0) {
-			return null;
-		}
-		Collections.sort(detectedTypes);
-		return detectedTypes.get(0);
-	}
-
-	@Override
-	public DetectedTestObjectType detect(final URI uri, final Credentials credentials) {
-		try {
-			if (!UriUtils.isFile(uri) || !new IFile(uri).isDirectory()) {
-				final UriUtils.HttpInputStream inputStream = (UriUtils.HttpInputStream) UriUtils.openStream(uri, credentials);
-				return detect(xmlDog.sniff(new InputSource(inputStream), true), uri.getScheme());
-			} else {
-				return detectFromSamples(uri);
-			}
-		} catch (IOException | XPathException e) {
-			logger.error("Error occurred during Test Object Type detection {} :", uri.getPath(), e);
-		}
-		return null;
-	}
-
-	@Override
-	public DetectedTestObjectType detectType(final EID testObjectTypeId, final URI uri, final Credentials credentials) {
-		final CompiledXpathExpression detectionExpression = detectionExpressionsEidMap.get(testObjectTypeId);
-		if (detectionExpression == null) {
-			return null;
-		}
-		try {
-			if (!UriUtils.isFile(uri) || !new IFile(uri).isDirectory()) {
-				final UriUtils.HttpInputStream inputStream = (UriUtils.HttpInputStream) UriUtils.openStream(uri, credentials);
-				return detectionExpression.getDetectedTestObjectType(xmlDog.sniff(new InputSource(inputStream)));
-			} else {
-				return detectFromSamples(uri);
-			}
-		} catch (IOException | XPathException e) {
-			logger.error("Error occurred during Test Object Type detection ", e);
-		}
-		return null;
-	}
 
 	@Override
 	public EidMap<TestObjectTypeDto> supportedTypes() {
@@ -352,7 +86,8 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 		for (final TestObjectTypeDto testObjectType : StdTestObjectTypes.types.values()) {
 			if (!SUtils.isNullOrEmpty(testObjectType.getDetectionExpression())) {
 				try {
-					final CompiledXpathExpression compiledExpression = new CompiledXpathExpression(testObjectType, this.xmlDog);
+					final CompiledDetectionExpression compiledExpression = new CompiledDetectionExpression(testObjectType,
+							this.xmlDog);
 					detectionExpressions.add(compiledExpression);
 					detectionExpressionsEidMap.put(testObjectType.getId(), compiledExpression);
 				} catch (final SAXPathException e) {
@@ -374,5 +109,121 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 		detectionExpressions.clear();
 		detectionExpressionsEidMap.clear();
 		initialized = false;
+	}
+
+	private DetectedTestObjectType detect(final XPathResults results, final Resource resource) {
+		for (final CompiledDetectionExpression detectionExpression : detectionExpressions) {
+			try {
+				final DetectedTestObjectType type = detectionExpression.getDetectedTestObjectType(
+						results, resource);
+				if (type != null) {
+					return type;
+				}
+			} catch (ClassCastException | XPathExpressionException e) {
+				logger.error("Could not evaluate XPath expression: ", e);
+			}
+		}
+		// Fallback
+		if (resource.getUri().getScheme().startsWith("http")) {
+			return new StdDetectedTestObjectType(StdTestObjectTypes.WEB_SERVICE_TOT, resource);
+		} else {
+			return new StdDetectedTestObjectType(StdTestObjectTypes.XML_DOCUMENTS_TOT, resource);
+		}
+	}
+
+	/**
+	 * Detect Test Object Type from samples in a directory
+	 *
+	 * @param directory directory as URI
+	 * @return Test Object Type or null if unknown
+	 * @throws IOException if an error occurs accessing the files
+	 */
+	private DetectedTestObjectType detectInDirFromSamples(final URI directory) throws IOException {
+		final IFile dir = new IFile(directory);
+		final List<IFile> files = dir.getFilesInDirRecursive(GmlAndXmlFilter.instance().filename(), 6, false);
+		if (files == null || files.size() == 0) {
+			throw new IOException("No files found");
+		}
+		final List<DetectedTestObjectType> detectedTypes = new ArrayList<>(5);
+		for (final IFile sample : Sample.normalDistributed(files, 5)) {
+			try {
+				final InputStream inputStream = new FileInputStream(sample);
+				detectedTypes.add(detect(xmlDog.sniff(new InputSource(inputStream)),
+						new StdResource("dir", directory)));
+			} catch (XPathException e) {
+				ExcUtils.suppress(e);
+			}
+		}
+		if (detectedTypes.size() == 0) {
+			return null;
+		}
+		Collections.sort(detectedTypes);
+		return detectedTypes.get(0);
+	}
+
+	private DetectedTestObjectType detectType(final CompiledDetectionExpression detectionExpression, final Resource resource) {
+		try {
+			if (!UriUtils.isFile(resource.getUri()) || !new IFile(resource.getUri()).isDirectory()) {
+				final Resource normalizedResource = detectionExpression.getNormalizedResource(resource);
+				return detectionExpression.getDetectedTestObjectType(
+						xmlDog.sniff(new InputSource(normalizedResource.openStream())), normalizedResource);
+			} else {
+				return detectInDirFromSamples(resource.getUri());
+			}
+		} catch (IOException | XPathException e) {
+			logger.error("Error occurred during Test Object Type detection ", e);
+		}
+		return null;
+	}
+
+	private DetectedTestObjectType getFirstDetectedType(final Resource resource,
+			final List<CompiledDetectionExpression> expressions) {
+		Collections.sort(expressions);
+		for (final CompiledDetectionExpression expression : expressions) {
+			final DetectedTestObjectType detectedType = detectType(expression, resource);
+			if (detectedType != null) {
+				return detectedType;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public DetectedTestObjectType detectType(final Resource resource, final Set<EID> expectedTypes) {
+
+		// Types that can be detected by URI
+		final List<CompiledDetectionExpression> uriDetectionCandidates = new ArrayList<>();
+		// All others
+		final List<CompiledDetectionExpression> expressionsForExpectedTypes = new ArrayList<>();
+		for (final EID expectedType : expectedTypes) {
+			final CompiledDetectionExpression detectionExpression = detectionExpressionsEidMap.get(expectedType);
+			if(detectionExpression!=null) {
+				if (detectionExpression.isUriKnown(resource.getUri())) {
+					uriDetectionCandidates.add(detectionExpression);
+				} else {
+					expressionsForExpectedTypes.add(detectionExpression);
+				}
+			}else{
+
+			}
+		}
+		if (!uriDetectionCandidates.isEmpty()) {
+			// Test Object types could be detected by URI
+			final DetectedTestObjectType detectedType = getFirstDetectedType(resource, uriDetectionCandidates);
+			if (detectedType != null) {
+				return detectedType;
+			}
+		}
+		// Test Object types could not be identified by URI
+		final DetectedTestObjectType detectedType = getFirstDetectedType(resource, expressionsForExpectedTypes);
+		if (detectedType != null) {
+			return detectedType;
+		}
+		return null;
+	}
+
+	@Override
+	public DetectedTestObjectType detectType(final Resource resource) {
+		return getFirstDetectedType(resource, detectionExpressionsEidMap.asList());
 	}
 }
