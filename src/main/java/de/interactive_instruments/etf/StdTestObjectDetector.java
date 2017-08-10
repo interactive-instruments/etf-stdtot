@@ -15,6 +15,27 @@
  */
 package de.interactive_instruments.etf;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.xpath.XPathException;
+import javax.xml.xpath.XPathExpressionException;
+
+import jlibs.xml.DefaultNamespaceContext;
+import jlibs.xml.sax.dog.XMLDog;
+import jlibs.xml.sax.dog.XPathResults;
+
+import org.jaxen.saxpath.SAXPathException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+
 import de.interactive_instruments.IFile;
 import de.interactive_instruments.SUtils;
 import de.interactive_instruments.Sample;
@@ -32,24 +53,6 @@ import de.interactive_instruments.exceptions.InitializationException;
 import de.interactive_instruments.exceptions.InvalidStateTransitionException;
 import de.interactive_instruments.exceptions.config.ConfigurationException;
 import de.interactive_instruments.io.GmlAndXmlFilter;
-import jlibs.xml.DefaultNamespaceContext;
-import jlibs.xml.sax.dog.XMLDog;
-import jlibs.xml.sax.dog.XPathResults;
-import org.jaxen.saxpath.SAXPathException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
-
-import javax.xml.xpath.XPathException;
-import javax.xml.xpath.XPathExpressionException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Standard detector for Test Object Types.
@@ -71,8 +74,6 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 	private final List<CompiledDetectionExpression> detectionExpressions = new ArrayList<>();
 
 	private final EidMap<CompiledDetectionExpression> detectionExpressionsEidMap = new DefaultEidMap<>();
-
-
 
 	private final XMLDog xmlDog = new XMLDog(new DefaultNamespaceContext(), null, null);
 
@@ -197,13 +198,13 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 		final List<CompiledDetectionExpression> expressionsForExpectedTypes = new ArrayList<>();
 		for (final EID expectedType : expectedTypes) {
 			final CompiledDetectionExpression detectionExpression = detectionExpressionsEidMap.get(expectedType);
-			if(detectionExpression!=null) {
+			if (detectionExpression != null) {
 				if (detectionExpression.isUriKnown(resource.getUri())) {
 					uriDetectionCandidates.add(detectionExpression);
 				} else {
 					expressionsForExpectedTypes.add(detectionExpression);
 				}
-			}else{
+			} else {
 
 			}
 		}

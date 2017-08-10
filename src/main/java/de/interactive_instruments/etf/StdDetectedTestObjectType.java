@@ -15,6 +15,9 @@
  */
 package de.interactive_instruments.etf;
 
+import java.util.List;
+import java.util.Objects;
+
 import de.interactive_instruments.SUtils;
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectDto;
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectTypeDto;
@@ -24,9 +27,6 @@ import de.interactive_instruments.etf.model.EidHolder;
 import de.interactive_instruments.etf.model.ExpressionType;
 import de.interactive_instruments.etf.model.capabilities.Resource;
 import de.interactive_instruments.etf.model.capabilities.TestObjectType;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
@@ -148,7 +148,7 @@ class StdDetectedTestObjectType implements DetectedTestObjectType {
 			testObject.setDescription(this.extractedDescription);
 		}
 		if (normalizedResource != null && normalizedResource.getUri() != null &&
-				testObject.getResourceCollection()!=null && !testObject.getResourceCollection().isEmpty()) {
+				testObject.getResourceCollection() != null && !testObject.getResourceCollection().isEmpty()) {
 			testObject.getResourceCollection().iterator().next().setUri(
 					normalizedResource.getUri());
 		}

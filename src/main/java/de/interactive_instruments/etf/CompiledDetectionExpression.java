@@ -15,23 +15,26 @@
  */
 package de.interactive_instruments.etf;
 
+import java.net.URI;
+import java.util.Collection;
+import java.util.regex.Pattern;
+
+import javax.xml.xpath.XPathExpressionException;
+
+import jlibs.xml.sax.dog.DataType;
+import jlibs.xml.sax.dog.NodeItem;
+import jlibs.xml.sax.dog.XMLDog;
+import jlibs.xml.sax.dog.XPathResults;
+import jlibs.xml.sax.dog.expr.Expression;
+
+import org.jaxen.saxpath.SAXPathException;
+
 import de.interactive_instruments.SUtils;
 import de.interactive_instruments.UriUtils;
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectTypeDto;
 import de.interactive_instruments.etf.detector.DetectedTestObjectType;
 import de.interactive_instruments.etf.model.capabilities.MutableCachedResource;
 import de.interactive_instruments.etf.model.capabilities.Resource;
-import jlibs.xml.sax.dog.DataType;
-import jlibs.xml.sax.dog.NodeItem;
-import jlibs.xml.sax.dog.XMLDog;
-import jlibs.xml.sax.dog.XPathResults;
-import jlibs.xml.sax.dog.expr.Expression;
-import org.jaxen.saxpath.SAXPathException;
-
-import javax.xml.xpath.XPathExpressionException;
-import java.net.URI;
-import java.util.Collection;
-import java.util.regex.Pattern;
 
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
@@ -124,7 +127,7 @@ final class CompiledDetectionExpression implements Comparable<CompiledDetectionE
 	@Override
 	public int compareTo(final CompiledDetectionExpression o) {
 		final int cmp = Integer.compare(this.priority, o.priority);
-		if(cmp==0) {
+		if (cmp == 0) {
 			// Compare label so that "OGC Web Feature Service 2.0" is tested before
 			// "OGC Web Feature Service 1.1"
 			return -this.testObjectType.getLabel().compareTo(o.testObjectType.getLabel());
