@@ -19,14 +19,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpressionException;
 
+import de.interactive_instruments.*;
+import de.interactive_instruments.etf.model.capabilities.CachedRemoteResource;
+import de.interactive_instruments.etf.model.capabilities.LocalResource;
+import de.interactive_instruments.etf.model.capabilities.RemoteResource;
 import jlibs.xml.DefaultNamespaceContext;
 import jlibs.xml.sax.dog.XMLDog;
 import jlibs.xml.sax.dog.XPathResults;
@@ -36,10 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
-import de.interactive_instruments.IFile;
-import de.interactive_instruments.SUtils;
-import de.interactive_instruments.Sample;
-import de.interactive_instruments.UriUtils;
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectTypeDto;
 import de.interactive_instruments.etf.detector.DetectedTestObjectType;
 import de.interactive_instruments.etf.detector.TestObjectTypeDetector;
@@ -47,7 +45,6 @@ import de.interactive_instruments.etf.model.DefaultEidMap;
 import de.interactive_instruments.etf.model.EID;
 import de.interactive_instruments.etf.model.EidMap;
 import de.interactive_instruments.etf.model.capabilities.Resource;
-import de.interactive_instruments.etf.model.capabilities.StdResource;
 import de.interactive_instruments.exceptions.ExcUtils;
 import de.interactive_instruments.exceptions.InitializationException;
 import de.interactive_instruments.exceptions.InvalidStateTransitionException;
@@ -112,8 +109,9 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 		initialized = false;
 	}
 
-	private DetectedTestObjectType detect(final XPathResults results, final Resource resource) {
-		for (final CompiledDetectionExpression detectionExpression : detectionExpressions) {
+	private DetectedTestObjectType detectLocalFile(final XPathResults results,
+			final LocalResource resource, final List<CompiledDetectionExpression> expressions) {
+		for (final CompiledDetectionExpression detectionExpression : expressions) {
 			try {
 				final DetectedTestObjectType type = detectionExpression.getDetectedTestObjectType(
 						results, resource);
@@ -124,66 +122,83 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 				logger.error("Could not evaluate XPath expression: ", e);
 			}
 		}
-		// Fallback
-		if (resource.getUri().getScheme().startsWith("http")) {
-			return new StdDetectedTestObjectType(StdTestObjectTypes.WEB_SERVICE_TOT, resource);
-		} else {
-			return new StdDetectedTestObjectType(StdTestObjectTypes.XML_DOCUMENTS_TOT, resource);
-		}
+		return null;
 	}
 
 	/**
 	 * Detect Test Object Type from samples in a directory
 	 *
-	 * @param directory directory as URI
+	 * @param localResource directory as URI
 	 * @return Test Object Type or null if unknown
 	 * @throws IOException if an error occurs accessing the files
 	 */
-	private DetectedTestObjectType detectInDirFromSamples(final URI directory) throws IOException {
-		final IFile dir = new IFile(directory);
+	private DetectedTestObjectType detectInLocalDirFromSamples(final List<CompiledDetectionExpression> expressions,
+			final LocalResource localResource) throws IOException {
+		final IFile dir = localResource.getFile();
 		final List<IFile> files = dir.getFilesInDirRecursive(GmlAndXmlFilter.instance().filename(), 6, false);
 		if (files == null || files.size() == 0) {
-			throw new IOException("No files found");
+			return null;
 		}
-		final List<DetectedTestObjectType> detectedTypes = new ArrayList<>(5);
-		for (final IFile sample : Sample.normalDistributed(files, 5)) {
+		final TreeSet<DetectedTestObjectType> detectedTypes = new TreeSet<>();
+		for (final IFile sample : Sample.normalDistributed(files, 7)) {
 			try {
 				final InputStream inputStream = new FileInputStream(sample);
-				detectedTypes.add(detect(xmlDog.sniff(new InputSource(inputStream)),
-						new StdResource("dir", directory)));
+				final DetectedTestObjectType detectedType =
+						detectLocalFile(xmlDog.sniff(new InputSource(inputStream)), localResource, expressions);
+				if(detectedType!=null) {
+					detectedTypes.add(detectedType);
+				}
+				if(detectedTypes.size()>=expressions.size()) {
+					// skip if we have detected types for all expressions
+					break;
+				}
 			} catch (XPathException e) {
 				ExcUtils.suppress(e);
 			}
 		}
-		if (detectedTypes.size() == 0) {
+		if(detectedTypes.isEmpty()) {
 			return null;
 		}
-		Collections.sort(detectedTypes);
-		return detectedTypes.get(0);
+		return detectedTypes.first();
 	}
 
-	private DetectedTestObjectType detectType(final CompiledDetectionExpression detectionExpression, final Resource resource) {
+	/**
+	 *
+	 * @param detectionExpression
+	 * @param resource
+	 * @return
+	 */
+	private DetectedTestObjectType detectRemote(final CompiledDetectionExpression detectionExpression, final CachedRemoteResource resource) {
 		try {
-			if (!UriUtils.isFile(resource.getUri()) || !new IFile(resource.getUri()).isDirectory()) {
-				final Resource normalizedResource = detectionExpression.getNormalizedResource(resource);
-				return detectionExpression.getDetectedTestObjectType(
-						xmlDog.sniff(new InputSource(normalizedResource.openStream())), normalizedResource);
-			} else {
-				return detectInDirFromSamples(resource.getUri());
-			}
+			//
+			final Resource normalizedResource = detectionExpression.getNormalizedResource(resource);
+			return detectionExpression.getDetectedTestObjectType(
+					xmlDog.sniff(new InputSource(normalizedResource.openStream())), normalizedResource);
 		} catch (IOException | XPathException e) {
 			logger.error("Error occurred during Test Object Type detection ", e);
 		}
 		return null;
 	}
 
-	private DetectedTestObjectType getFirstDetectedType(final Resource resource,
+	private DetectedTestObjectType detectedType(final Resource resource,
 			final List<CompiledDetectionExpression> expressions) {
 		Collections.sort(expressions);
-		for (final CompiledDetectionExpression expression : expressions) {
-			final DetectedTestObjectType detectedType = detectType(expression, resource);
-			if (detectedType != null) {
-				return detectedType;
+
+		// detect remote type
+		if(resource instanceof RemoteResource) {
+			final CachedRemoteResource cachedResource = Resource.toCached((RemoteResource) resource);
+			for (final CompiledDetectionExpression expression : expressions) {
+				final DetectedTestObjectType detectedType = detectRemote(expression, cachedResource);
+				if (detectedType != null) {
+					return detectedType;
+				}
+			}
+		}else{
+			try {
+				return detectInLocalDirFromSamples(expressions, (LocalResource) resource);
+			} catch (IOException ign) {
+				ExcUtils.suppress(ign);
+				return null;
 			}
 		}
 		return null;
@@ -204,27 +219,27 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 				} else {
 					expressionsForExpectedTypes.add(detectionExpression);
 				}
-			} else {
-
 			}
 		}
 		if (!uriDetectionCandidates.isEmpty()) {
 			// Test Object types could be detected by URI
-			final DetectedTestObjectType detectedType = getFirstDetectedType(resource, uriDetectionCandidates);
+			final DetectedTestObjectType detectedType = detectedType(resource, uriDetectionCandidates);
 			if (detectedType != null) {
 				return detectedType;
 			}
 		}
 		// Test Object types could not be identified by URI
-		final DetectedTestObjectType detectedType = getFirstDetectedType(resource, expressionsForExpectedTypes);
+		final DetectedTestObjectType detectedType = detectedType(resource, expressionsForExpectedTypes);
 		if (detectedType != null) {
 			return detectedType;
 		}
+
+		// should never happen, fallback types are XML and WEBSERVICE
 		return null;
 	}
 
 	@Override
 	public DetectedTestObjectType detectType(final Resource resource) {
-		return getFirstDetectedType(resource, detectionExpressionsEidMap.asList());
+		return detectedType(resource, detectionExpressions);
 	}
 }

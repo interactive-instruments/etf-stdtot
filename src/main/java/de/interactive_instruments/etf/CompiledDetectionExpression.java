@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPathExpressionException;
 
+import de.interactive_instruments.etf.model.capabilities.*;
 import jlibs.xml.sax.dog.DataType;
 import jlibs.xml.sax.dog.NodeItem;
 import jlibs.xml.sax.dog.XMLDog;
@@ -33,8 +34,6 @@ import de.interactive_instruments.SUtils;
 import de.interactive_instruments.UriUtils;
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectTypeDto;
 import de.interactive_instruments.etf.detector.DetectedTestObjectType;
-import de.interactive_instruments.etf.model.capabilities.MutableCachedResource;
-import de.interactive_instruments.etf.model.capabilities.Resource;
 
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
@@ -115,11 +114,11 @@ final class CompiledDetectionExpression implements Comparable<CompiledDetectionE
 	}
 
 	Resource getNormalizedResource(final Resource resource) {
-		if (this.testObjectType.getDefaultQuery() != null) {
-			final MutableCachedResource normalizedResource = new MutableCachedResource(resource);
+		if (this.testObjectType.getDefaultQuery() != null && resource instanceof RemoteResource) {
+			final MutableRemoteResource normalizedResource = Resource.toMutable((RemoteResource) resource);
 			normalizedResource.setQueyParameters(
 					UriUtils.toSingleQueryParameterValues(this.testObjectType.getDefaultQuery()));
-			return normalizedResource;
+			return Resource.toImmutable(normalizedResource);
 		}
 		return resource;
 	}

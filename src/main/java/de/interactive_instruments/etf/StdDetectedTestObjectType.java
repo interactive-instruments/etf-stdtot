@@ -47,7 +47,7 @@ class StdDetectedTestObjectType implements DetectedTestObjectType {
 			final Resource normalizedResource, final String label, final String description,
 			final int priority) {
 		this.testObjectType = Objects.requireNonNull(testObjectType);
-		this.normalizedResource = Objects.requireNonNull(normalizedResource);
+		this.normalizedResource = Resource.toImmutable(Objects.requireNonNull(normalizedResource));
 		this.extractedLabel = label;
 		this.extractedDescription = description;
 		this.priority = priority;
@@ -141,14 +141,14 @@ class StdDetectedTestObjectType implements DetectedTestObjectType {
 
 	@Override
 	public void enrichAndNormalize(final TestObjectDto testObject) {
-		if (SUtils.isNullOrEmpty(testObject.getLabel())) {
+		if (!SUtils.isNullOrEmpty(this.extractedLabel)) {
 			testObject.setLabel(this.extractedLabel);
 		}
-		if (SUtils.isNullOrEmpty(testObject.getDescription())) {
+		if (!SUtils.isNullOrEmpty(this.extractedDescription)) {
 			testObject.setDescription(this.extractedDescription);
 		}
-		if (normalizedResource != null && normalizedResource.getUri() != null &&
-				testObject.getResourceCollection() != null && !testObject.getResourceCollection().isEmpty()) {
+		if (normalizedResource.getUri() != null && testObject.getResourceCollection() != null
+				&& !testObject.getResourceCollection().isEmpty()) {
 			testObject.getResourceCollection().iterator().next().setUri(
 					normalizedResource.getUri());
 		}
@@ -157,7 +157,7 @@ class StdDetectedTestObjectType implements DetectedTestObjectType {
 
 	@Override
 	public Resource getNormalizedResource() {
-		return this.normalizedResource;
+		return Resource.toImmutable(this.normalizedResource);
 	}
 
 	@Override
