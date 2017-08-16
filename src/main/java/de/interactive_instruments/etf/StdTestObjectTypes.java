@@ -163,7 +163,15 @@ public class StdTestObjectTypes {
 							+ "namespace-uri() = 'http://www.opengis.net/wfs/2.0'])", ExpressionType.XPATH);
 					WFS_2_0_TOT.setLabelExpression(owsLabelExpression, ExpressionType.XPATH);
 					WFS_2_0_TOT.setDescriptionExpression(owsDescriptionExpression, ExpressionType.XPATH);
-					WFS_2_0_TOT.setDefaultPathAndQuery("?REQUEST=GetCapabilities&SERVICE=wfs&ACCEPTVERSIONS=2.0.0");
+					// The GetCapabilities request includes both the "AcceptVersions" and the "version" parameters.
+					// Strictly, for WFS 2.0 / OWS Common 1.1, only the "AcceptVersions" parameter is specified.
+					// However, for backward compatibility, the "version" parameter, which has been used in earlier
+					// versions of the WFS standard, is still included as a deprecated parameter in OWS Common 1.1.
+					// OWS Common 1.1.0 states: "A server may also optionally implement the old-style version negotiation
+					// mechanism so that old clients that send GetCapabilities requests containing a 'version' parameter
+					// can be served." To cover both the old and the newer version negotiation approach, the request
+					// includes both parameters.
+					WFS_2_0_TOT.setDefaultPathAndQuery("?REQUEST=GetCapabilities&SERVICE=wfs&ACCEPTVERSIONS=2.0.0&VERSION=2.0.0");
 					WFS_2_0_TOT.setUriDetectionExpression("(service=wfs.*(version=2\\.0\\.|acceptversions=2\\.0\\.))|"
 							+ "((version=2\\.0\\.|acceptversions=2\\.0\\.).*service=wfs)");
 					put(WFS_2_0_ID, WFS_2_0_TOT);

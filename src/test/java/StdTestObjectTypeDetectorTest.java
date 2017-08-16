@@ -55,7 +55,7 @@ public class StdTestObjectTypeDetectorTest {
 		assertEquals("SimpleDemo WFS", testObject.getLabel());
 		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
 		assertEquals("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
-				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs", testObject.getResourceByName("serviceEndpoint").toString());
+				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class StdTestObjectTypeDetectorTest {
 		assertEquals("SimpleDemo WFS", testObject.getLabel());
 		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
 		assertEquals("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
-				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs", testObject.getResourceByName("serviceEndpoint").toString());
+				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
 	}
 
 	@Test
