@@ -1,17 +1,21 @@
 /**
- * Copyright 2010-2017 interactive instruments GmbH
+ * Copyright 2017 European Union
+ * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://joinup.ec.europa.eu/software/page/eupl
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the Licence is distributed on an "AS IS" basis,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ *
+ * This work was supported by the EU Interoperability Solutions for
+ * European Public Administrations Programme (http://ec.europa.eu/isa)
+ * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf;
 
@@ -25,10 +29,6 @@ import java.util.stream.Collectors;
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpressionException;
 
-import de.interactive_instruments.*;
-import de.interactive_instruments.etf.model.capabilities.CachedRemoteResource;
-import de.interactive_instruments.etf.model.capabilities.LocalResource;
-import de.interactive_instruments.etf.model.capabilities.RemoteResource;
 import jlibs.xml.DefaultNamespaceContext;
 import jlibs.xml.sax.dog.XMLDog;
 import jlibs.xml.sax.dog.XPathResults;
@@ -38,12 +38,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
+import de.interactive_instruments.*;
 import de.interactive_instruments.etf.dal.dto.capabilities.TestObjectTypeDto;
 import de.interactive_instruments.etf.detector.DetectedTestObjectType;
 import de.interactive_instruments.etf.detector.TestObjectTypeDetector;
 import de.interactive_instruments.etf.model.DefaultEidMap;
 import de.interactive_instruments.etf.model.EID;
 import de.interactive_instruments.etf.model.EidMap;
+import de.interactive_instruments.etf.model.capabilities.CachedRemoteResource;
+import de.interactive_instruments.etf.model.capabilities.LocalResource;
+import de.interactive_instruments.etf.model.capabilities.RemoteResource;
 import de.interactive_instruments.etf.model.capabilities.Resource;
 import de.interactive_instruments.exceptions.ExcUtils;
 import de.interactive_instruments.exceptions.InitializationException;
@@ -143,12 +147,12 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 		for (final IFile sample : Sample.normalDistributed(files, 7)) {
 			try {
 				final InputStream inputStream = new FileInputStream(sample);
-				final DetectedTestObjectType detectedType =
-						detectLocalFile(xmlDog.sniff(new InputSource(inputStream)), localResource, expressions);
-				if(detectedType!=null) {
+				final DetectedTestObjectType detectedType = detectLocalFile(xmlDog.sniff(new InputSource(inputStream)),
+						localResource, expressions);
+				if (detectedType != null) {
 					detectedTypes.add(detectedType);
 				}
-				if(detectedTypes.size()>=expressions.size()) {
+				if (detectedTypes.size() >= expressions.size()) {
 					// skip if we have detected types for all expressions
 					break;
 				}
@@ -156,7 +160,7 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 				ExcUtils.suppress(e);
 			}
 		}
-		if(detectedTypes.isEmpty()) {
+		if (detectedTypes.isEmpty()) {
 			return null;
 		}
 		return detectedTypes.first();
@@ -168,7 +172,8 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 	 * @param resource
 	 * @return
 	 */
-	private DetectedTestObjectType detectRemote(final CompiledDetectionExpression detectionExpression, final CachedRemoteResource resource) {
+	private DetectedTestObjectType detectRemote(final CompiledDetectionExpression detectionExpression,
+			final CachedRemoteResource resource) {
 		try {
 			//
 			final Resource normalizedResource = detectionExpression.getNormalizedResource(resource);
@@ -185,7 +190,7 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 		Collections.sort(expressions);
 
 		// detect remote type
-		if(resource instanceof RemoteResource) {
+		if (resource instanceof RemoteResource) {
 			final CachedRemoteResource cachedResource = Resource.toCached((RemoteResource) resource);
 			for (final CompiledDetectionExpression expression : expressions) {
 				final DetectedTestObjectType detectedType = detectRemote(expression, cachedResource);
@@ -193,7 +198,7 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 					return detectedType;
 				}
 			}
-		}else{
+		} else {
 			try {
 				return detectInLocalDirFromSamples(expressions, (LocalResource) resource);
 			} catch (IOException ign) {

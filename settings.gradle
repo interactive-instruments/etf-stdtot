@@ -1,1 +1,2 @@
 rootProject.name = 'etf-stdtot'
+gradle.ext.set('ii.license.header', 'eupl-12-license-eu-copy')
