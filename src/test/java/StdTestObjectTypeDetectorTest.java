@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import de.interactive_instruments.Credentials;
 import de.interactive_instruments.IFile;
 import de.interactive_instruments.UriUtils;
 import de.interactive_instruments.etf.dal.dto.capabilities.ResourceDto;
@@ -55,6 +56,27 @@ public class StdTestObjectTypeDetectorTest {
 		assertEquals("SimpleDemo WFS", testObject.getLabel());
 		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
 		assertEquals("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
+				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
+	}
+
+	@Test
+	public void test11_Wfs20_secured() throws URISyntaxException, IOException, TestObjectTypeNotDetected {
+		// Important: only the http endpoint is secured with a password
+		final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
+				Resource.create("test",
+						new URI("http://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-secured/wfs"
+								+ "?request=GetCapabilities&service=wfs"), new Credentials("etf", "etf")));
+		assertNotNull(detectedType);
+		assertEquals("9b6ef734-981e-4d60-aa81-d6730a1c6389", detectedType.getId().toString());
+		assertEquals("db12feeb-0086-4006-bc74-28f4fdef0171", detectedType.getParent().getId().toString());
+
+		final TestObjectDto testObject = new TestObjectDto();
+		testObject.addResource(new ResourceDto("serviceEndpoint", "http://none"));
+		detectedType.enrichAndNormalize(testObject);
+
+		assertEquals("SimpleDemo WFS", testObject.getLabel());
+		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
+		assertEquals("http://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-secured/wfs"
 				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
 	}
 
