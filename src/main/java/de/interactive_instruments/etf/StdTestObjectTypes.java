@@ -473,9 +473,12 @@ public class StdTestObjectTypes {
 					METADATA_RECORDS_TOT.setParent(XML_DOCUMENTS_TOT);
 					METADATA_RECORDS_TOT.setDescription(
 							"A set of XML documents. Each document contains one or more gmd:MD_Metadata elements.");
-					METADATA_RECORDS_TOT.setDetectionExpression("boolean(/*[(local-name() = 'GetRecordsResponse' and "
-							+ "starts-with(namespace-uri(), 'http://www.opengis.net/cat/csw/')) or "
-							+ "(local-name() = 'MD_Metadata' and namespace-uri() = 'http://www.isotc211.org/2005/gmd')])",
+					METADATA_RECORDS_TOT.setDetectionExpression(
+							"boolean(/*["
+									+ "(local-name() = 'GetRecordsResponse' and starts-with(namespace-uri(), 'http://www.opengis.net/cat/csw/')) or "
+									+ "(local-name() = 'GetRecordByIdResponse' and starts-with(namespace-uri(), 'http://www.opengis.net/cat/csw/')) or "
+									+ "(local-name() = 'MD_Metadata' and namespace-uri() = 'http://www.isotc211.org/2005/gmd')"
+							+ "])",
 							ExpressionType.XPATH);
 					put(METADATA_RECORDS_ID, METADATA_RECORDS_TOT);
 				}
