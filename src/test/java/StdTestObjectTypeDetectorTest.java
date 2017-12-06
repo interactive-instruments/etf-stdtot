@@ -43,7 +43,7 @@ public class StdTestObjectTypeDetectorTest {
 	public void test11_Wfs20() throws URISyntaxException, IOException, TestObjectTypeNotDetected {
 		final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
 				Resource.create("test",
-						new URI("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
+						new URI("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
 								+ "?request=GetCapabilities&service=wfs")));
 		assertNotNull(detectedType);
 		assertEquals("9b6ef734-981e-4d60-aa81-d6730a1c6389", detectedType.getId().toString());
@@ -55,8 +55,8 @@ public class StdTestObjectTypeDetectorTest {
 
 		assertEquals("SimpleDemo WFS", testObject.getLabel());
 		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
-		assertEquals("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
-				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
+		assertEquals("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
+				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=WFS&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class StdTestObjectTypeDetectorTest {
 		assertEquals("SimpleDemo WFS", testObject.getLabel());
 		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
 		assertEquals("http://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-secured/wfs"
-				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
+				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=WFS&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class StdTestObjectTypeDetectorTest {
 			ObjectWithIdNotFoundException, IncompatibleTestObjectTypeException {
 		final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
 				Resource.create("test",
-						new URI("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
+						new URI("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
 								+ "?request=GetCapabilities&service=wfs")),
 				TestObjectTypeDetectorManager.getTypes("bc6384f3-2652-4c7b-bc45-20cec488ecd0").keySet());
 		assertNotNull(detectedType);
@@ -98,8 +98,8 @@ public class StdTestObjectTypeDetectorTest {
 
 		assertEquals("SimpleDemo WFS", testObject.getLabel());
 		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
-		assertEquals("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
-				+ "?request=GetCapabilities&service=wfs&VERSION=1.1.0", testObject.getResourceByName("serviceEndpoint").toString());
+		assertEquals("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
+				+ "?request=GetCapabilities&service=WFS&VERSION=1.1.0", testObject.getResourceByName("serviceEndpoint").toString());
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class StdTestObjectTypeDetectorTest {
 			ObjectWithIdNotFoundException, IncompatibleTestObjectTypeException {
 		final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
 				Resource.create("test",
-						new URI("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
+						new URI("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
 								+ "?request=GetCapabilities&service=wfs")),
 				TestObjectTypeDetectorManager.getTypes("db12feeb-0086-4006-bc74-28f4fdef0171").keySet());
 		assertNotNull(detectedType);
@@ -120,8 +120,8 @@ public class StdTestObjectTypeDetectorTest {
 
 		assertEquals("SimpleDemo WFS", testObject.getLabel());
 		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
-		assertEquals("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
-				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
+		assertEquals("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
+				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=WFS&VERSION=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class StdTestObjectTypeDetectorTest {
 		// request with version=2.0.0 parameter instead of acceptversions
 		final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
 				Resource.create("test",
-						new URI("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
+						new URI("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
 								+ "?request=GetCapabilities&service=wfs&version=2.0.0")));
 		assertNotNull(detectedType);
 		assertEquals("9b6ef734-981e-4d60-aa81-d6730a1c6389", detectedType.getId().toString());
@@ -142,8 +142,8 @@ public class StdTestObjectTypeDetectorTest {
 
 		assertEquals("SimpleDemo WFS", testObject.getLabel());
 		assertEquals("SimpleDemo WFS by XtraServer", testObject.getDescription());
-		assertEquals("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
-				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=wfs&version=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
+		assertEquals("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
+				+ "?ACCEPTVERSIONS=2.0.0&request=GetCapabilities&service=WFS&version=2.0.0", testObject.getResourceByName("serviceEndpoint").toString());
 	}
 
 	@Test
@@ -153,7 +153,7 @@ public class StdTestObjectTypeDetectorTest {
 		try {
 			final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
 					Resource.create("test",
-							new URI("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
+							new URI("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
 									+ "?request=GetCapabilities&service=wfs&version=2.0.0")),
 					// Expect WMS
 					TestObjectTypeDetectorManager.getTypes("d1836a8d-9909-4899-a0bc-67f512f5f5ac").keySet());
@@ -172,7 +172,7 @@ public class StdTestObjectTypeDetectorTest {
 			// Expecting WMS 1.3 but provide WFS 2.0.0 URL
 			final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
 					Resource.create("test",
-							new URI("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
+							new URI("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
 									+ "?request=GetCapabilities&service=wfs&version=2.0.0")),
 					// Expect WMS 1.3
 					TestObjectTypeDetectorManager.getTypes("9981e87e-d642-43b3-ad5f-e77469075e74").keySet());
@@ -253,7 +253,7 @@ public class StdTestObjectTypeDetectorTest {
 			// Expecting GML FEATURE COLLECTION but provide WFS 2.0.0 URL
 			final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
 					Resource.create("test",
-							new URI("https://services.interactive-instruments.de/cite-xs-49/simpledemo/cgi-bin/cities-postgresql/wfs"
+							new URI("https://services.interactive-instruments.de/cite-xs-46/simpledemo/cgi-bin/cities-postgresql/wfs"
 									+ "?request=GetCapabilities&service=wfs")),
 					TestObjectTypeDetectorManager.getTypes("e1d4a306-7a78-4a3b-ae2d-cf5f0810853e").keySet());
 		}catch (final IncompatibleTestObjectTypeException e) {
