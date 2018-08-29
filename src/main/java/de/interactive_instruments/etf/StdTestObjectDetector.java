@@ -85,7 +85,7 @@ public class StdTestObjectDetector implements TestObjectTypeDetector {
 
 	@Override
 	public void init() throws ConfigurationException, InitializationException, InvalidStateTransitionException {
-		for (final TestObjectTypeDto testObjectType : StdTestObjectTypes.types.values()) {
+		for (final TestObjectTypeDto testObjectType : supportedTypes().values()) {
 			if (!SUtils.isNullOrEmpty(testObjectType.getDetectionExpression())) {
 				try {
 					final CompiledDetectionExpression compiledExpression = new CompiledDetectionExpression(testObjectType,
