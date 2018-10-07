@@ -60,6 +60,13 @@ public class StdTestObjectTypeDetectorTest {
 	}
 
 	@Test
+	public void test11_temp() throws URISyntaxException, IOException, TestObjectTypeNotDetected {
+		final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
+				Resource.create("test",
+						new URI("http://nokis.niedersachsen.de/X-Meta_nokis_nlpv-y/servants/de/disy/preludio2/service/cat/csw/v_2_0_2/GetRecordByIdServant$Get?SERVICE=CSW&REQUEST=GetRecordById&VERSION=2.0.2&ElementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd&Id=76564667-51e1-40c4-adf0-502dfd17e94f")));
+	}
+
+	@Test
 	public void test11_Wfs20_secured() throws URISyntaxException, IOException, TestObjectTypeNotDetected {
 		// Important: only the http endpoint is secured with a password
 		final DetectedTestObjectType detectedType = TestObjectTypeDetectorManager.detect(
